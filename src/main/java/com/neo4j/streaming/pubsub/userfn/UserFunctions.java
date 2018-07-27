@@ -9,23 +9,21 @@ import java.io.IOException;
 import java.util.Map;
 
 public class UserFunctions {
+    public static final String version = "0.0.1-SNAPSHOT";
+
     @UserFunction("pubsub.version")
     @Description("RETURN pubsub.version() | return the current pubsub installed version")
     public String version() {
-        return UserFunctions.class.getPackage().getImplementationVersion();
+        return version;
     }
 
     @UserFunction("pubsub.publish")
-    @Description("RETURN pubsub.publish('google', 'project', 'topic', { map: 'values' })")
+    @Description("RETURN pubsub.publish('google', 'my-project-id', 'pubsub-topic-id', { field1: 'value', field2: value })")
     public Map<String,Object> publish(
             @Name("provider") final String provider,
             @Name("project") final String project,
             @Name("topic") final String topic,
             @Name("message") final Map<String,Object> message) throws IOException {
-
-        if (!"google".equals(provider)) {
-            throw new UnsupportedOperationException("Unsupported provider " + provider + "; please use google");
-        }
 
         System.out.println("About to publish " + provider + "/" + project + "/" + topic + "/" + message);
 
