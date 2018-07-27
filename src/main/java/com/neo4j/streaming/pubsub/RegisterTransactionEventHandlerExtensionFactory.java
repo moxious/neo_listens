@@ -1,8 +1,9 @@
-package com.maxdemarzi;
+package com.neo4j.streaming.pubsub;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.extension.KernelExtensionFactory;
 import org.neo4j.kernel.impl.spi.KernelContext;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.kernel.impl.logging.LogService;
@@ -19,14 +20,15 @@ public class RegisterTransactionEventHandlerExtensionFactory extends KernelExten
         return new LifecycleAdapter() {
             LogService log = dependencies.log();
 
-            private MyTransactionEventHandler handler;
+            private TEHandler handler;
             private ExecutorService executor;
 
             @Override
             public void start() {
                 System.out.println("STARTING trigger watcher");
                 executor = Executors.newFixedThreadPool(2);
-                handler = new MyTransactionEventHandler(dependencies.getGraphDatabaseService(), executor, log);
+                PubsubConfiguration.initialize(dependencies.getGraphDatabaseAPI());
+                handler = new TEHandler(dependencies.getGraphDatabaseService(), executor, log);
                 dependencies.getGraphDatabaseService().registerTransactionEventHandler(handler);
             }
 
@@ -41,6 +43,7 @@ public class RegisterTransactionEventHandlerExtensionFactory extends KernelExten
 
     interface Dependencies {
         GraphDatabaseService getGraphDatabaseService();
+        GraphDatabaseAPI getGraphDatabaseAPI();
         LogService log();
     }
 

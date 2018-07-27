@@ -1,20 +1,19 @@
-package com.maxdemarzi;
+package com.neo4j.streaming.pubsub;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.event.TransactionData;
 import org.neo4j.graphdb.event.TransactionEventHandler;
 import org.neo4j.kernel.impl.logging.LogService;
-import org.neo4j.logging.Log;
 
 import java.util.concurrent.ExecutorService;
 
-public class MyTransactionEventHandler implements TransactionEventHandler {
+public class TEHandler implements TransactionEventHandler {
 
     public static GraphDatabaseService db;
     private static ExecutorService ex;
     public static LogService logsvc;
 
-    public MyTransactionEventHandler(GraphDatabaseService graphDatabaseService, ExecutorService executor, LogService logsvc) {
+    public TEHandler(GraphDatabaseService graphDatabaseService, ExecutorService executor, LogService logsvc) {
         db = graphDatabaseService;
         ex = executor;
         this.logsvc = logsvc;
@@ -27,7 +26,7 @@ public class MyTransactionEventHandler implements TransactionEventHandler {
 
     @Override
     public void afterCommit(TransactionData transactionData, Object o) {
-        ex.submit(new SuspectRunnable(transactionData, db, logsvc));
+        ex.submit(new TransactionStreamer(transactionData, db, logsvc));
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.maxdemarzi;
+package com.neo4j.streaming.pubsub;
 
 import org.neo4j.graphdb.RelationshipType;
 

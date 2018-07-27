@@ -6,7 +6,7 @@ PASSWORD=admin
 CWD=`pwd`
 NEO4J=neo4j:3.4.4-enterprise
 
-docker run -d --name neo4j-empty --rm \
+docker run --rm --name neo4j-empty --rm \
 	-p 127.0.0.1:7474:7474 \
         -p 127.0.0.1:7687:7687 \
         --env=NEO4J_dbms_memory_pagecache_size=1G \
@@ -15,8 +15,10 @@ docker run -d --name neo4j-empty --rm \
 	--env=NEO4J_AUTH=neo4j/admin \
 	--env=NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
         -v /Users/davidallen/hax/neo_listens/target:/plugins \
+        -v $HOME/.google:/google \
         --env=NEO4J_dbms_security_procedures_unrestricted="com.maxdemarzi.*" \
+        --env=GOOGLE_APPLICATION_CREDENTIALS=/google/testbed-187316-a4da62423f60.json \
 	-t $NEO4J
 
-echo "When you're ready to run some cypher, execute this:"
-echo docker exec --interactive --tty neo4j-empty bin/cypher-shell -a localhost -u neo4j -p $PASSWORD
+#echo "When you're ready to run some cypher, execute this:"
+#echo docker exec --interactive --tty neo4j-empty bin/cypher-shell -a localhost -u neo4j -p $PASSWORD

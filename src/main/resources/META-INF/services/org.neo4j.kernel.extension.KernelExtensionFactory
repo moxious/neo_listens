@@ -1,1 +1,1 @@
-com.maxdemarzi.RegisterTransactionEventHandlerExtensionFactory
+com.neo4j.streaming.pubsub.RegisterTransactionEventHandlerExtensionFactory
