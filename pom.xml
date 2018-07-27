@@ -73,6 +73,7 @@
                                         <exclude>scala/**</exclude>
                                         <exclude>com/github/benmanes/**</exclude>
                                         <exclude>module-info.class</exclude>
+                                        <exclude>org/apache/commons/**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
@@ -83,6 +84,7 @@
                                     <exclude>com.github.benmanes:*</exclude>
                                     <exclude>org.apache.lucene:*</exclude>
                                     <exclude>org.objectweb.asm:*</exclude>
+                                    <exclude>org.apache.commons:*</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>

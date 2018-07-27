@@ -24,7 +24,7 @@ public class TransactionStreamer implements Runnable {
 
         try {
             if (conn == null) {
-                conn = new PubSubConnector(logsvc);
+                conn = new PubSubConnector();
             }
         } catch (IOException exc) {
             log.error("Failed to initialize pubsub connector, disabling" + exc);

@@ -25,6 +25,8 @@ public class RegisterTransactionEventHandlerExtensionFactory extends KernelExten
 
             @Override
             public void start() {
+                PubSubConnector.initialize(log);
+
                 System.out.println("STARTING trigger watcher");
                 executor = Executors.newFixedThreadPool(2);
                 PubsubConfiguration.initialize(dependencies.getGraphDatabaseAPI());
