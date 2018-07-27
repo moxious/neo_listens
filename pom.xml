@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.maxdemarzi</groupId>
-    <artifactId>triggers</artifactId>
-    <version>1.0</version>
+    <groupId>com.neo4j.streaming.pubsub</groupId>
+    <artifactId>pubsub</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
 
     <properties>
         <neo4j.version>3.4.4</neo4j.version>

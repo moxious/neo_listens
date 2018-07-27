@@ -1,44 +1,29 @@
-Neo_Listens
+Neo4j Streaming
 ===========
 
-Sample Event Listener / Triggers
-
+Neo4j server plugin for streaming node and edge messages to pub/sub
+connectors.
 
 1. Build it:
 
         mvn clean package
 
-2. Copy target/triggers-1.0.jar to the plugins/ directory of your Neo4j server.
+2. Copy target/pubsub*.jar to the plugins/ directory of your Neo4j server.
 
-3. Start your Neo4j Server
+3.  Configure your Neo4j server:
 
-4. Run these queries, tailing the graph.db/log/debug.log file:
+```
+pubsub.provider=google
+pubsub.project=my-google-project-id
+pubsub.topic=some-google-pubsub-topic-id
+```
+
+4. Start your Neo4j Server
+
+4. Run any create query:
 
         CREATE (max:User {name:"Max"}) RETURN max;
 
-        CREATE (al:Suspect {name:"Al Capone"}) RETURN al;
-
-        MATCH (max:User),(al:Suspect)
-        WHERE max.name = "Max" AND al.name = "Al Capone"
-        CREATE (max)-[r:KNOWS]->(al)
-        RETURN r;
-
-        CREATE (monica:User {name:"Monica"}) RETURN monica;
-
-        MATCH (max:User),(monica:User)
-        WHERE max.name = "Max" AND monica.name = "Monica"
-        CREATE (max)-[r:KNOWS]->(monica)
-        RETURN r;
-
-        MATCH (monica:User)
-        WHERE monica.name = "Monica"
-        SET monica :Suspect
-        RETURN monica;
-
-5. You should see:
-
-        A new Suspect has been created!
-        A new direct relationship to a Suspect has been created!
-        A new indirect relationship to a Suspect has been created!
-        A new Suspect has been identified!
+5. You should see messages published to the Google Pubsub topic.
+    
 
