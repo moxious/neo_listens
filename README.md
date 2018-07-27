@@ -20,10 +20,40 @@ pubsub.topic=some-google-pubsub-topic-id
 
 4. Start your Neo4j Server
 
-4. Run any create query:
+5. Run any sample cypher to create some data:
 
-        CREATE (max:User {name:"Max"}) RETURN max;
+```
+CREATE (p1:Person { name: "David" }),
+(p2:Person { name: "Mark" }),
+(p3:Person { name: "Susan" })
 
-5. You should see messages published to the Google Pubsub topic.
-    
+MERGE (p1)-[:KNOWS]->(p2)
+MERGE (p2)-[:KNOWS]->(p3)
+MERGE (p3)-[:KNOWS]->(p2);
+```
 
+6. If you have an existing pull subscription on the topic, you should see messages published.  Messages look like this:
+
+Nodes:
+```
+{ 
+  "entityType":"node",
+  "id":0,
+  "event":"create",
+  "properties":{"name":"David"},
+  "labels":["Person"]
+}
+```
+
+Relationships:
+```
+{
+  "entityType":"relationship",
+  "start":2,
+  "end":1,
+  "id":2,
+  "event":"create",
+  "type":"KNOWS",
+  "properties":{}
+}
+```
