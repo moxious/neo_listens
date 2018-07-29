@@ -1,1 +1,1 @@
-com.neo4j.streaming.pubsub.RegisterTransactionEventHandlerExtensionFactory
+com.neo4j.googlecloud.pubsub.RegisterTransactionEventHandlerExtensionFactory

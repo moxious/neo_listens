@@ -1,4 +1,4 @@
-package com.neo4j.streaming.pubsub.serializers;
+package com.neo4j.googlecloud.serializers;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;

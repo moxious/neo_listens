@@ -1,4 +1,4 @@
-package com.neo4j.streaming.pubsub;
+package com.neo4j.googlecloud.pubsub;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.event.TransactionData;

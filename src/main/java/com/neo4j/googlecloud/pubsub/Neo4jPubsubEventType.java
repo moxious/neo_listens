@@ -1,4 +1,4 @@
-package com.neo4j.streaming.pubsub;
+package com.neo4j.googlecloud.pubsub;
 
 public enum Neo4jPubsubEventType {
     CREATE {

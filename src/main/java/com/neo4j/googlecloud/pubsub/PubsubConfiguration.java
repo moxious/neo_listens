@@ -1,14 +1,13 @@
-package com.neo4j.streaming.pubsub;
+package com.neo4j.googlecloud.pubsub;
 
 import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class PubsubConfiguration {
-    public static final String PREFIX = "pubsub.";
+    public static final String PREFIX = "google.pubsub.";
     private static Map<String, Object> config = new HashMap<>(10);
 
     public static void initialize(GraphDatabaseAPI db) {

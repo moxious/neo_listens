@@ -1,6 +1,6 @@
-package com.neo4j.streaming.pubsub.userfn;
+package com.neo4j.googlecloud.pubsub.userfn;
 
-import com.neo4j.streaming.pubsub.PubSubConnector;
+import com.neo4j.googlecloud.pubsub.PubSubConnector;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.logging.Log;
@@ -12,7 +12,6 @@ import org.neo4j.procedure.UserFunction;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class UserFunctions {
     @Context public GraphDatabaseService db;
@@ -37,7 +36,7 @@ public class UserFunctions {
         System.out.println("About to publish " + provider + "/" + project + "/" + topic + "/" + message);
 
         try {
-            PubSubConnector connector = new PubSubConnector(provider, project, topic);
+            PubSubConnector connector = new PubSubConnector(project, topic);
             return connector.sendMessage(message);
         } catch(Exception exc) {
             exc.printStackTrace();

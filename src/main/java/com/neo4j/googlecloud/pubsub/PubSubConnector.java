@@ -1,4 +1,4 @@
-package com.neo4j.streaming.pubsub;
+package com.neo4j.googlecloud.pubsub;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +15,7 @@ import com.google.cloud.pubsub.v1.Publisher;
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.ProjectTopicName;
 import com.google.pubsub.v1.PubsubMessage;
-import com.neo4j.streaming.pubsub.serializers.*;
+import com.neo4j.googlecloud.serializers.*;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
@@ -58,6 +58,7 @@ public class PubSubConnector {
         module.addSerializer(Relationship.class, new RelationshipSerializer());
 
         mapper.registerModule(module);
+        mapper.enableDefaultTyping();
 
         TimeZone tz = TimeZone.getTimeZone("UTC");
         df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
@@ -67,31 +68,31 @@ public class PubSubConnector {
     public PubSubConnector() throws IOException {
         String topicId = PubsubConfiguration.get("topic", "UNDEFINED") + "";
         String projectId = PubsubConfiguration.get("project", "UNDEFINED") + "";
-        String provider = PubsubConfiguration.get("provider", "UNDEFINED") + "";
 
         this.topic = ProjectTopicName.of(projectId, topicId);
 
-        log.info("PubSub Connector: provider " + provider + " -> " + this.describe());
+        log.info("PubSub Connector -> " + this.describe());
 
         try {
             this.publisher = Publisher.newBuilder(topic)
-                    .setBatchingSettings(configureBatchingSettings())
-                    .setRetrySettings(configureRetrySettings())
+//                    .setBatchingSettings(configureBatchingSettings())
+//                    .setRetrySettings(configureRetrySettings())
                     .build();
         } catch(Exception exc) {
-            log.error("Failed to create " + provider + " PubSub connector publisher:" + exc);
+            exc.printStackTrace();
+            log.error("Failed to create PubSub connector publisher:" + exc);
         }
     }
 
-    public PubSubConnector(String provider, String projectId, String topicId) throws IOException {
+    public PubSubConnector(String projectId, String topicId) {
         this.topic = ProjectTopicName.of(projectId, topicId);
 
-        log.info("PubSub Connector: provider " + provider + " -> " + this.describe());
+        log.info("PubSub Connector: " + this.describe());
 
         try {
             this.publisher = Publisher.newBuilder(topic).build();
         } catch(Exception exc) {
-            log.error("Failed to create " + provider + " PubSub connector publisher: " + exc);
+            log.error("Failed to create PubSub connector publisher: " + exc);
         }
     }
 
@@ -131,7 +132,7 @@ public class PubSubConnector {
         return this.topic.getProject() + "/" + this.topic.getTopic();
     }
 
-    private PubsubMessage toMsg(Map<String,Object> input) throws JsonProcessingException {
+    public PubsubMessage toMsg(Map<String,Object> input) throws JsonProcessingException {
         String nowAsISO = df.format(new Date());
         input.put("time", nowAsISO);
         byte [] json = mapper.writeValueAsBytes(input);
