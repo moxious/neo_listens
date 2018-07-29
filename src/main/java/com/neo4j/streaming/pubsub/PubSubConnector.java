@@ -6,17 +6,19 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.api.core.ApiFuture;
 import com.google.api.core.ApiFutureCallback;
 import com.google.api.core.ApiFutures;
+import com.google.api.gax.batching.BatchingSettings;
+import com.google.api.gax.batching.FlowControlSettings;
+import com.google.api.gax.batching.FlowController;
+import com.google.api.gax.retrying.RetrySettings;
 import com.google.api.gax.rpc.ApiException;
 import com.google.cloud.pubsub.v1.Publisher;
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.ProjectTopicName;
 import com.google.pubsub.v1.PubsubMessage;
-import com.neo4j.streaming.pubsub.serializers.DateTimeValueSerializer;
-import com.neo4j.streaming.pubsub.serializers.DateValueSerializer;
-import com.neo4j.streaming.pubsub.serializers.PointValueSerializer;
-import com.neo4j.streaming.pubsub.serializers.TemporalValueSerializer;
+import com.neo4j.streaming.pubsub.serializers.*;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.kernel.impl.logging.LogService;
 import org.neo4j.logging.Log;
@@ -24,6 +26,7 @@ import org.neo4j.values.storable.DateTimeValue;
 import org.neo4j.values.storable.DateValue;
 import org.neo4j.values.storable.PointValue;
 import org.neo4j.values.storable.TemporalValue;
+import org.threeten.bp.Duration;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -50,6 +53,9 @@ public class PubSubConnector {
         module.addSerializer(PointValue.class, new PointValueSerializer());
         module.addSerializer(DateTimeValue.class, new DateTimeValueSerializer());
         module.addSerializer(DateValue.class, new DateValueSerializer());
+        module.addSerializer(Path.class, new PathSerializer());
+        module.addSerializer(Node.class, new NodeSerializer());
+        module.addSerializer(Relationship.class, new RelationshipSerializer());
 
         mapper.registerModule(module);
 
@@ -68,7 +74,10 @@ public class PubSubConnector {
         log.info("PubSub Connector: provider " + provider + " -> " + this.describe());
 
         try {
-            this.publisher = Publisher.newBuilder(topic).build();
+            this.publisher = Publisher.newBuilder(topic)
+                    .setBatchingSettings(configureBatchingSettings())
+                    .setRetrySettings(configureRetrySettings())
+                    .build();
         } catch(Exception exc) {
             log.error("Failed to create " + provider + " PubSub connector publisher:" + exc);
         }
@@ -84,6 +93,38 @@ public class PubSubConnector {
         } catch(Exception exc) {
             log.error("Failed to create " + provider + " PubSub connector publisher: " + exc);
         }
+    }
+
+    public RetrySettings configureRetrySettings() {
+        // Docs for what's happening are here:
+        // http://googleapis.github.io/gax-java/1.29.0/apidocs/com/google/api/gax/retrying/RetrySettings.html?is-external=true
+        return RetrySettings.newBuilder()
+                .setTotalTimeout(Duration.ZERO)
+                .setInitialRetryDelay(Duration.ZERO)
+                .setRetryDelayMultiplier(1.0)
+                .setMaxRetryDelay(Duration.ZERO)
+                .setMaxAttempts(0)
+                .setJittered(true)
+                .setInitialRpcTimeout(Duration.ZERO)
+                .setRpcTimeoutMultiplier(1.0)
+                .setMaxRpcTimeout(Duration.ZERO)
+                .build();
+    }
+
+    public BatchingSettings configureBatchingSettings() {
+        // Docs for what this is doing:
+        // http://googleapis.github.io/gax-java/1.29.0/apidocs/com/google/api/gax/batching/BatchingSettings.html
+        return BatchingSettings.newBuilder()
+                .setElementCountThreshold(1L)
+                .setRequestByteThreshold(1L)
+                .setDelayThreshold(Duration.ofMillis(1))
+                .setFlowControlSettings(
+                        // Disable flow control.  Needs tuning, this could be bad if messages come in faster than
+                        // they can be pushed out, the alternative is to "block" and wait until they can be sent,
+                        // which would slow the system down but better guarantee delivery.
+                        FlowControlSettings.newBuilder()
+                                .setLimitExceededBehavior(FlowController.LimitExceededBehavior.Ignore).build())
+                .build();
     }
 
     public String describe() {
