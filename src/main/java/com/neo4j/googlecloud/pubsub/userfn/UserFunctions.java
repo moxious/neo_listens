@@ -19,21 +19,20 @@ public class UserFunctions {
 
     public static final String version = "0.0.1-SNAPSHOT";
 
-    @UserFunction("pubsub.version")
-    @Description("RETURN pubsub.version() | return the current pubsub installed version")
+    @UserFunction("google.pubsub.version")
+    @Description("RETURN google.pubsub.version() | return the current pubsub installed version")
     public String version() {
         return version;
     }
 
-    @UserFunction("pubsub.publish.single")
-    @Description("RETURN pubsub.publish.single('google', 'my-project-id', 'pubsub-topic-id', { field1: 'value', field2: value })")
-    public Map<String,Object> publishSingle(
-            @Name("provider") final String provider,
+    @UserFunction("google.pubsub.publish.message")
+    @Description("RETURN google.pubsub.publish.message('my-project-id', 'pubsub-topic-id', { field1: 'value', field2: value })")
+    public Map<String,Object> publishMessage(
             @Name("project") final String project,
             @Name("topic") final String topic,
             @Name("message") final Map<String,Object> message) throws IOException {
 
-        System.out.println("About to publish " + provider + "/" + project + "/" + topic + "/" + message);
+        System.out.println("About to publish " + project + "/" + topic + "/" + message);
 
         try {
             PubSubConnector connector = new PubSubConnector(project, topic);
@@ -44,7 +43,7 @@ public class UserFunctions {
         }
     }
 
-    @UserFunction("pubsub.publish.queryResult")
+    @UserFunction("google.pubsub.publish.queryResult")
     @Description("RETURN pubsub.publish.queryResult('MATCH (p:Person { name: 'Emil' }) RETURN p'")
     public long publishQueryResult(
             @Name("query") final String query) throws IOException {

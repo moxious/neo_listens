@@ -71,7 +71,7 @@ public class PubSubConnector {
 
         this.topic = ProjectTopicName.of(projectId, topicId);
 
-        log.info("PubSub Connector -> " + this.describe());
+        log.debug("PubSub Connector -> " + this.describe());
 
         try {
             this.publisher = Publisher.newBuilder(topic)
@@ -87,7 +87,7 @@ public class PubSubConnector {
     public PubSubConnector(String projectId, String topicId) {
         this.topic = ProjectTopicName.of(projectId, topicId);
 
-        log.info("PubSub Connector: " + this.describe());
+        log.debug("PubSub Connector: " + this.describe());
 
         try {
             this.publisher = Publisher.newBuilder(topic).build();

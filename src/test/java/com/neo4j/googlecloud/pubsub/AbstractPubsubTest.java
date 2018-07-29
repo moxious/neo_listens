@@ -11,7 +11,7 @@ import org.neo4j.harness.junit.Neo4jRule;
 public class AbstractPubsubTest {
     @Rule
     public Neo4jRule neo4j = new Neo4jRule()
-            .withConfig("dbms.security.procedures.unrestricted","pubsub.*")
+            .withConfig("dbms.security.procedures.unrestricted","google.pubsub.*")
             .withConfig("google.pubsub.topic", "tmp")
             .withConfig("google.pubsub.project", "testbed-187316")
             .withFunction(com.neo4j.googlecloud.pubsub.userfn.UserFunctions.class);
