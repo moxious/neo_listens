@@ -11,7 +11,6 @@ public class TransactionStreamer implements Runnable {
     private static TransactionData td;
     private static GraphDatabaseService db;
     private static Log log = null;
-    private static PubSubConnector conn = null;
     private boolean enabled = true;
 
     public TransactionStreamer (TransactionData transactionData, GraphDatabaseService graphDatabaseService, LogService logsvc) {
@@ -21,15 +20,6 @@ public class TransactionStreamer implements Runnable {
         if (log == null) {
             log = logsvc.getUserLog(TransactionStreamer.class);
         }
-
-        try {
-            if (conn == null) {
-                conn = new PubSubConnector();
-            }
-        } catch (IOException exc) {
-            log.error("Failed to initialize pubsub connector, disabling" + exc);
-            enabled = false;
-        }
     }
 
     @Override
@@ -38,20 +28,22 @@ public class TransactionStreamer implements Runnable {
 
         try (Transaction tx = db.beginTx()) {
            for (Node n : td.createdNodes()) {
-                conn.send(n, Neo4jPubsubEventType.CREATE);
+                PubSubConnectorPool.active.getDefault().send(n, Neo4jPubsubEventType.CREATE);
             }
 
             for (Relationship r : td.createdRelationships()) {
-                conn.send(r, Neo4jPubsubEventType.CREATE);
+                PubSubConnectorPool.active.getDefault().send(r, Neo4jPubsubEventType.CREATE);
             }
 
             for (Node n : td.deletedNodes()) {
-                conn.send(n, Neo4jPubsubEventType.DELETE);
+                PubSubConnectorPool.active.getDefault().send(n, Neo4jPubsubEventType.DELETE);
             }
 
             for (Relationship r : td.deletedRelationships()) {
-                conn.send(r, Neo4jPubsubEventType.DELETE);
+                PubSubConnectorPool.active.getDefault().send(r, Neo4jPubsubEventType.DELETE);
             }
+
+            tx.success();
         } catch(Exception e) {
             log.error("Exception processing transaction" + e);
         }

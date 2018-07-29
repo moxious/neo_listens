@@ -7,5 +7,9 @@ public enum Neo4jPubsubEventType {
 
     DELETE {
         public String toString() { return "delete"; }
+    },
+
+    NOTICE {
+        public String toString() { return "notice"; }
     }
 }

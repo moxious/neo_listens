@@ -1,8 +1,9 @@
 package com.neo4j.googlecloud.pubsub.userfn;
 
+import com.neo4j.googlecloud.pubsub.Neo4jPubsubEventType;
 import com.neo4j.googlecloud.pubsub.PubSubConnector;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Result;
+import com.neo4j.googlecloud.pubsub.PubSubConnectorPool;
+import org.neo4j.graphdb.*;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -35,8 +36,7 @@ public class UserFunctions {
         System.out.println("About to publish " + project + "/" + topic + "/" + message);
 
         try {
-            PubSubConnector connector = new PubSubConnector(project, topic);
-            return connector.sendMessage(message);
+            return PubSubConnectorPool.active.get(project, topic).sendMessage(message);
         } catch(Exception exc) {
             exc.printStackTrace();
             return null;
@@ -49,7 +49,7 @@ public class UserFunctions {
             @Name("query") final String query) throws IOException {
         long c = 0;
 
-        PubSubConnector connector = new PubSubConnector();
+        PubSubConnector connector = PubSubConnectorPool.active.getDefault();
         Result r = db.execute(query, Collections.emptyMap());
 
         while(r.hasNext()) {
@@ -60,5 +60,23 @@ public class UserFunctions {
 
         r.close();
         return c;
+    }
+
+    @UserFunction("google.pubsub.publish.node")
+    @Description("MATCH (n:Person) RETURN google.pubsub.publish.node(n);")
+    public Map<String,Object> publishNode(@Name("node") final Node n) throws IOException {
+        return PubSubConnectorPool.active.getDefault().send(n, Neo4jPubsubEventType.NOTICE);
+    }
+
+    @UserFunction("google.pubsub.publish.relationship")
+    @Description("MATCH (n:Person) RETURN google.pubsub.publish.relationship(r);")
+    public Map<String,Object> publishRel(@Name("relationship") final Relationship relationship) throws IOException {
+        return PubSubConnectorPool.active.getDefault().send(relationship, Neo4jPubsubEventType.NOTICE);
+    }
+
+    @UserFunction("google.pubsub.publish.path")
+    @Description("MATCH (n:Person) RETURN google.pubsub.publish.path(p);")
+    public Map<String,Object> publishPath(@Name("path") final Path path) throws IOException {
+        return PubSubConnectorPool.active.getDefault().send(path, Neo4jPubsubEventType.NOTICE);
     }
 }

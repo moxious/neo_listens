@@ -16,10 +16,7 @@ import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.ProjectTopicName;
 import com.google.pubsub.v1.PubsubMessage;
 import com.neo4j.googlecloud.serializers.*;
-import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Path;
-import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.*;
 import org.neo4j.kernel.impl.logging.LogService;
 import org.neo4j.logging.Log;
 import org.neo4j.values.storable.DateTimeValue;
@@ -58,14 +55,14 @@ public class PubSubConnector {
         module.addSerializer(Relationship.class, new RelationshipSerializer());
 
         mapper.registerModule(module);
-        mapper.enableDefaultTyping();
+//        mapper.enableDefaultTyping();
 
         TimeZone tz = TimeZone.getTimeZone("UTC");
         df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
         df.setTimeZone(tz);
     }
 
-    public PubSubConnector() throws IOException {
+    public PubSubConnector() {
         String topicId = PubsubConfiguration.get("topic", "UNDEFINED") + "";
         String projectId = PubsubConfiguration.get("project", "UNDEFINED") + "";
 
@@ -132,6 +129,12 @@ public class PubSubConnector {
         return this.topic.getProject() + "/" + this.topic.getTopic();
     }
 
+    public PubsubMessage toMsg(Object o) throws JsonProcessingException {
+        return PubsubMessage.newBuilder()
+                .setData(ByteString.copyFrom(mapper.writeValueAsBytes(o)))
+                .build();
+    }
+
     public PubsubMessage toMsg(Map<String,Object> input) throws JsonProcessingException {
         String nowAsISO = df.format(new Date());
         input.put("time", nowAsISO);
@@ -140,6 +143,10 @@ public class PubSubConnector {
         return PubsubMessage.newBuilder()
                 .setData(data)
                 .build();
+    }
+
+    public Map<String,Object> sendMessage(Object o) throws JsonProcessingException {
+        return sendMessage(toMsg(o));
     }
 
     public Map<String,Object> sendMessage(Map<String,Object> serializableMessageParams) throws JsonProcessingException {
@@ -212,5 +219,9 @@ public class PubSubConnector {
         data.put("properties", r.getAllProperties());
 
         return sendMessage(data);
+    }
+
+    public Map<String,Object> send(Path p, Neo4jPubsubEventType et) throws JsonProcessingException {
+        return sendMessage(p);
     }
 }

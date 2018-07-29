@@ -29,8 +29,7 @@ public class PathSerializer extends StdSerializer<Path> {
 
         // Path is a JSON array of path elements to preserve ordering and
         // avoid pointer chasing.
-        jgen.writeObjectFieldStart("path");
-        jgen.writeStartArray();
+        jgen.writeArrayFieldStart("path");
 
         Iterator<PropertyContainer> it = p.iterator();
         while (it.hasNext()) {
@@ -38,7 +37,6 @@ public class PathSerializer extends StdSerializer<Path> {
         }
 
         jgen.writeEndArray();
-        jgen.writeEndObject();
 
         // Close outer path object.
         jgen.writeEndObject();

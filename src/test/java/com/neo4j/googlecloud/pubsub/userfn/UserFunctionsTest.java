@@ -52,7 +52,7 @@ public class UserFunctionsTest extends AbstractPubsubTest {
             }
         });
 
-        Thread.sleep(4000);
+        Thread.sleep(3000);
         System.out.println(result);
     }
 }

@@ -6,7 +6,7 @@ connectors.
 
 1. Build it:
 
-        mvn clean package
+        mvn clean package -DskipTests
 
 2. Copy target/pubsub*.jar to the plugins/ directory of your Neo4j server.
 
