@@ -43,9 +43,9 @@ public class UserFunctions {
         }
     }
 
-    @UserFunction("google.pubsub.publish.queryResult")
-    @Description("RETURN pubsub.publish.queryResult('MATCH (p:Person { name: 'Emil' }) RETURN p'")
-    public long publishQueryResult(
+    @UserFunction("google.pubsub.publish.query")
+    @Description("RETURN pubsub.publish.query('MATCH (p:Person { name: 'Emil' }) RETURN p'")
+    public long publishQuery(
             @Name("query") final String query) throws IOException {
         long c = 0;
 

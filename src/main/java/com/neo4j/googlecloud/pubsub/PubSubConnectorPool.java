@@ -9,7 +9,7 @@ public class PubSubConnectorPool {
     public static final PubSubConnectorPool active = new PubSubConnectorPool();
 
     public PubSubConnectorPool() {
-        pool = new ConcurrentHashMap<String,PubSubConnector>(maxSize);
+        pool = new ConcurrentHashMap<>(maxSize);
     }
 
     private String keyFor(String project, String topic) {
@@ -19,7 +19,8 @@ public class PubSubConnectorPool {
     public PubSubConnector getDefault() {
         String topicId = PubsubConfiguration.get("topic", "UNDEFINED") + "";
         String projectId = PubsubConfiguration.get("project", "UNDEFINED") + "";
-        return get(projectId, topicId);
+        PubSubConnector conn = get(projectId, topicId);
+        return conn;
     }
 
     public PubSubConnector get(String project, String topic) {
@@ -29,8 +30,11 @@ public class PubSubConnectorPool {
             return pool.get(k);
         }
 
-        PubSubConnector conn = new PubSubConnector(project, topic);
-        pool.put(k, conn);
+        return set(project, topic, new PubSubConnector(project, topic));
+    }
+
+    public PubSubConnector set(String project, String topic, PubSubConnector conn) {
+        pool.put(keyFor(project, topic), conn);
         return conn;
     }
 }

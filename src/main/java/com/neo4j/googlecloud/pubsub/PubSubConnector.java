@@ -25,7 +25,6 @@ import org.neo4j.values.storable.PointValue;
 import org.neo4j.values.storable.TemporalValue;
 import org.threeten.bp.Duration;
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -55,7 +54,6 @@ public class PubSubConnector {
         module.addSerializer(Relationship.class, new RelationshipSerializer());
 
         mapper.registerModule(module);
-//        mapper.enableDefaultTyping();
 
         TimeZone tz = TimeZone.getTimeZone("UTC");
         df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
@@ -66,9 +64,11 @@ public class PubSubConnector {
         String topicId = PubsubConfiguration.get("topic", "UNDEFINED") + "";
         String projectId = PubsubConfiguration.get("project", "UNDEFINED") + "";
 
-        this.topic = ProjectTopicName.of(projectId, topicId);
+        System.out.println("Topic of " + projectId + "/" + topicId);
+        topic = ProjectTopicName.of(projectId, topicId);
 
-        log.debug("PubSub Connector -> " + this.describe());
+        System.out.println(this.topic);
+        log.debug("PubSub Connector -> " + describe());
 
         try {
             this.publisher = Publisher.newBuilder(topic)
@@ -82,9 +82,9 @@ public class PubSubConnector {
     }
 
     public PubSubConnector(String projectId, String topicId) {
-        this.topic = ProjectTopicName.of(projectId, topicId);
+        topic = ProjectTopicName.of(projectId, topicId);
 
-        log.debug("PubSub Connector: " + this.describe());
+        log.debug("PubSub Connector: " + describe());
 
         try {
             this.publisher = Publisher.newBuilder(topic).build();
@@ -137,11 +137,12 @@ public class PubSubConnector {
 
     public PubsubMessage toMsg(Map<String,Object> input) throws JsonProcessingException {
         String nowAsISO = df.format(new Date());
-        input.put("time", nowAsISO);
         byte [] json = mapper.writeValueAsBytes(input);
         ByteString data = ByteString.copyFrom(json);
+
         return PubsubMessage.newBuilder()
                 .setData(data)
+                .putAttributes("time", nowAsISO)
                 .build();
     }
 
@@ -153,7 +154,7 @@ public class PubSubConnector {
         return sendMessage(toMsg(serializableMessageParams));
     }
 
-    private Map<String,Object> sendMessage(PubsubMessage msg) {
+    public Map<String,Object> sendMessage(PubsubMessage msg) {
         log.info("Publishing message" + msg.getData().toString());
         final PubsubMessage m = msg;
 
