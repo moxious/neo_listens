@@ -26,7 +26,13 @@ public class TEHandler implements TransactionEventHandler {
 
     @Override
     public void afterCommit(TransactionData transactionData, Object o) {
-        ex.submit(new TransactionStreamer(transactionData, db, logsvc));
+        // By default the TX handler does nothing; if configured, it publishes
+        // changes.  The number of changes can be large, so sometimes it's desirable
+        // and sometimes not.
+        Boolean publishChanges = PubsubConfiguration.get("publishChanges", false);
+
+        if (publishChanges)
+            ex.submit(new TransactionStreamer(transactionData, db, logsvc));
     }
 
     @Override
